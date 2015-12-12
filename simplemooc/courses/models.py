@@ -9,7 +9,8 @@ class Course(models.Model):
 		'Data de Início', null=True, blank=True
 	) # null = true --> ele pode ficar em branco no formulario, mas no BD vai assumir o valor nulo se nao tiver preenchido
 	image = models.ImageField(
-		upload_to='courses/images', verbose_name='Imagem'
+		upload_to='courses/images', verbose_name='Imagem',
+		null=True, blank=True
 	)
 
 	created_at = models.DateTimeField(
