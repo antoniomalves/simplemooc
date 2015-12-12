@@ -1,5 +1,12 @@
 from django.db import models
 
+class CourseManager(models.Manager):
+	def search(self, query):
+		return self.get_queryset().filter(
+			models.Q(name__icontains=query) | \
+			models.Q(descritpion__icontains=query) # | == consulta "ou"
+		)
+
 class Course(models.Model):
 
 	name = models.CharField('Nome', max_length=100)
@@ -20,3 +27,4 @@ class Course(models.Model):
 		'Atualizado em', auto_now=True #toda vez que for salvo altera o valor de updated_at
 	)
 
+	objects = CourseManager()
