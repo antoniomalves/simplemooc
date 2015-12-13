@@ -36,3 +36,4 @@ class Course(models.Model):
 		verbose_name='Curso'
 		verbose_name_plural='Cursos'
 		ordering = ['name']
+		
