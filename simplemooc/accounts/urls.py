@@ -1,6 +1,9 @@
 from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
+	url(r'^$','simplemooc.accounts.views.dashboard', 
+		name='dashboard'),
+
 	url(r'^entrar/$','django.contrib.auth.views.login', 
 		{'template_name':'accounts/login.html'}, name='login'),
 
@@ -9,4 +12,10 @@ urlpatterns = patterns('',
 
 	url(r'^cadastre-se/$','simplemooc.accounts.views.register', 
 		name='register'),
+	
+	url(r'^editar/$','simplemooc.accounts.views.edit', 
+		name='edit'),
+
+	url(r'^editar-senha/$','simplemooc.accounts.views.edit_password', 
+		name='edit_password'),
 )
