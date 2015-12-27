@@ -12,6 +12,13 @@ urlpatterns = patterns('',
 
 	url(r'^cadastre-se/$','simplemooc.accounts.views.register', 
 		name='register'),
+
+	url(r'^nova-senha/$','simplemooc.accounts.views.password_reset', 
+		name='password_reset'),
+
+	url(r'^confirmar-nova-senha/(?P<key>\w+)/$',
+		'simplemooc.accounts.views.password_reset_confirm', 
+		name='password_reset_confirm'),
 	
 	url(r'^editar/$','simplemooc.accounts.views.edit', 
 		name='edit'),
