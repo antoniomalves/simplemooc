@@ -1,44 +1,94 @@
 from django.db import models
+from django.conf import settings
+
 
 class CourseManager(models.Manager):
-	def search(self, query):
-		return self.get_queryset().filter(
-			models.Q(name__icontains=query) | \
-			models.Q(descritpion__icontains=query) # | == consulta "ou"
-		)
+
+    def search(self, query):
+        return self.get_queryset().filter(
+            models.Q(name__icontains=query) |
+            models.Q(descritpion__icontains=query)  # | == consulta "ou"
+        )
+
 
 class Course(models.Model):
 
-	name = models.CharField('Nome', max_length=100)
-	slug = models.SlugField('Atalho')
-	description = models.TextField('Descricao Simples', blank=True) #blank == campo não obrigatorio
-	about = models.TextField('Sobre o Curso', blank=True)
-	start_date = models.DateField(
-		'Data de Início', null=True, blank=True
-	) # null = true --> ele pode ficar em branco no formulario, mas no BD vai assumir o valor nulo se nao tiver preenchido
-	image = models.ImageField(
-		upload_to='courses/images', verbose_name='Imagem',
-		null=True, blank=True
+    name = models.CharField('Nome', max_length=100)
+    slug = models.SlugField('Atalho')
+    # blank == campo não obrigatorio
+    description = models.TextField('Descricao Simples', blank=True)
+    about = models.TextField('Sobre o Curso', blank=True)
+    start_date = models.DateField(
+        'Data de Início', null=True, blank=True
+    )  # null = true --> ele pode ficar em branco no formulario, mas no BD vai assumir o valor nulo se nao tiver preenchido
+    image = models.ImageField(
+        upload_to='courses/images', verbose_name='Imagem',
+        null=True, blank=True
+    )
+
+    created_at = models.DateTimeField(
+        # quando for criado será criado o valor para a variavel
+        'Criado em', auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        # toda vez que for salvo altera o valor de updated_at
+        'Atualizado em', auto_now=True
+    )
+
+    objects = CourseManager()
+
+    def __str__(self):
+        return self.name
+
+    @models.permalink
+    def get_absolute_url(self):
+        return('courses:details', (), {'slug': self.slug})
+
+    class Meta:
+        verbose_name = 'Curso'
+        verbose_name_plural = 'Cursos'
+        ordering = ['name']
+
+
+#Inscricao no curso
+class Enrollment(models.Model): 
+
+	STATUS_CHOICES = (
+		(0, 'Pendente'),
+		(1, 'Aprovado'),
+		(2, 'Cancelado')
 	)
 
+	user = models.ForeignKey(
+		settings.AUTH_USER_MODEL, verbose_name='Usuário',
+		related_name='enrollments'
+	)
+	course = models.ForeignKey(
+		Course, verbose_name='Curso', related_name='enrollments'
+	)
+	#status da inscricao
+	status = models.IntegerField(verbose_name='Situação', 
+		choices=STATUS_CHOICES,
+		default=1,
+		blank=True,
+	)
 	created_at = models.DateTimeField(
-		'Criado em', auto_now_add=True  # quando for criado será criado o valor para a variavel
-	)
+        'Criado em', auto_now_add=True
+    )
+
 	updated_at = models.DateTimeField(
-		'Atualizado em', auto_now=True #toda vez que for salvo altera o valor de updated_at
-	)
+        'Atualizado em', auto_now=True
+    )
 
-	objects = CourseManager()
-
-	def __str__(self):
-		return self.name
-
-	@models.permalink	
-	def get_absolute_url(self):
-		return('courses:details', (), {'slug': self.slug})		
+	# ativar o aluno
+	def active(self):
+		self.status = 1
+		self.save()
 
 	class Meta:
-		verbose_name='Curso'
-		verbose_name_plural='Cursos'
-		ordering = ['name']
-		
+		verbose_name='Inscricão'
+		verbose_name_plural='Inscrições'
+		# se existir uma inscrição de um usuário no sistema não será possível criar uma nova
+		unique_together=(('user', 'course'),)
+
+	
